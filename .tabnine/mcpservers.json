@@ -1,0 +1,14 @@
+{
+  "servers": [
+    {
+      "name": "JiraIntegration",
+      "type": "jira",
+      "url": "https://delta-ai.atlassian.net/",
+      "auth": {
+        "type": "basic",
+        "username": "diego@montolius.com",
+        "password_env_var": "JIRA_API_TOKEN"
+      }
+    }
+  ]
+}

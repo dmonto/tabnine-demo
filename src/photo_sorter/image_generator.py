@@ -8,7 +8,7 @@ from io import BytesIO
 # Third-party imports
 from dotenv import load_dotenv
 import google.generativeai as genai
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 # --- Logger Configuration ---
 # Create a logger
@@ -50,6 +50,48 @@ genai.configure(api_key=s_api_key)
 # --- Constants ---
 S_MODEL_NAME = "gemini-2.5-flash-image-preview" # Using a standard and versatile model
 S_OUTPUT_DIR = "generated_images"
+
+def add_watermark(image, text, font_path="arial.ttf", font_size_ratio=0.05, opacity=128):
+    """
+    Añade una marca de agua de texto a una imagen.
+
+    Args:
+        image (PIL.Image.Image): La imagen a la que se añadirá la marca de agua.
+        text (str): El texto de la marca de agua.
+        font_path (str): La ruta a la fuente TrueType.
+        font_size_ratio (float): El tamaño de la fuente como una proporción del ancho de la imagen.
+        opacity (int): La opacidad de la marca de agua (0-255).
+
+    Returns:
+        PIL.Image.Image: La imagen con la marca de agua.
+    """
+    # Crea una copia de la imagen para dibujar sobre ella
+    watermark_image = image.copy().convert("RGBA")
+    # Crea una capa transparente para el texto
+    text_layer = Image.new("RGBA", watermark_image.size, (255, 255, 255, 0))
+
+    # Carga la fuente
+    try:
+        font_size = int(watermark_image.width * font_size_ratio)
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        print(f"Fuente no encontrada en {font_path}. Usando fuente por defecto.")
+        font = ImageFont.load_default()
+
+    # Crea el objeto de dibujo
+    draw = ImageDraw.Draw(text_layer)
+
+    # Calcula la posición del texto (esquina inferior derecha)
+    _, _, text_width, text_height = draw.textbbox((0, 0), text, font=font)
+    margin = int(watermark_image.width * 0.02)
+    x = watermark_image.width - text_width - margin
+    y = watermark_image.height - text_height - margin
+
+    # Dibuja el texto con la opacidad deseada
+    draw.text((x, y), text, font=font, fill=(255, 255, 255, opacity))
+
+    # Combina la capa de texto con la imagen original
+    return Image.alpha_composite(watermark_image, text_layer).convert("RGB")
 
 def generate_image(s_prompt, l_image_paths):
     """
@@ -94,12 +136,15 @@ def generate_image(s_prompt, l_image_paths):
             img_bytes = image_part.data
             img = Image.open(BytesIO(img_bytes))
             
+            # Add watermark to the generated image
+            img_with_watermark = add_watermark(img, "Curso Tabnine")
+
             # Create a unique filename using a timestamp
             s_timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             s_output_path = os.path.join(S_OUTPUT_DIR, f"generated_{s_timestamp}.png")
             
             # Save the image and return its path
-            img.save(s_output_path, "PNG")
+            img_with_watermark.save(s_output_path, "PNG")
             logger.info("Successfully generated and saved image to %s", s_output_path)
             return s_output_path
         else:

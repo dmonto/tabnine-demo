@@ -1,0 +1,98 @@
+{
+  "commands": [
+    {
+      "name": "add_jira_comment",
+      "description": "Adds a comment to a specific Jira ticket.",
+      "server": "JiraIntegration",
+      "endpoint": "/rest/api/3/issue/{issueIdOrKey}/comment",
+      "method": "POST",
+      "params": [
+        {
+          "name": "issueIdOrKey",
+          "type": "string",
+          "description": "The ID or key of the Jira ticket (e.g., 'PROJ-123').",
+          "required": true,
+          "in": "path"
+        },
+        {
+          "name": "comment_body",
+          "type": "string",
+          "description": "The text content of the comment to add.",
+          "required": true,
+          "in": "body",
+          "body_template": {
+            "body": {
+              "type": "doc",
+              "version": 1,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "{{comment_body}}"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "transition_jira_ticket",
+      "description": "Changes the status of a Jira ticket (e.g., 'To Do', 'In Progress', 'Done').",
+      "server": "JiraIntegration",
+      "endpoint": "/rest/api/3/issue/{issueIdOrKey}/transitions",
+      "method": "POST",
+      "params": [
+        {
+          "name": "issueIdOrKey",
+          "type": "string",
+          "description": "The ID or key of the Jira ticket (e.g., 'PROJ-123').",
+          "required": true,
+          "in": "path"
+        },
+        {
+          "name": "transition_id",
+          "type": "string",
+          "description": "The ID of the transition to execute. You can get this from the Jira API.",
+          "required": true,
+          "in": "body",
+          "body_template": {
+            "transition": {
+              "id": "{{transition_id}}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "update_jira_ticket_fields",
+      "description": "Updates one or more fields of a Jira ticket.",
+      "server": "JiraIntegration",
+      "endpoint": "/rest/api/3/issue/{issueIdOrKey}",
+      "method": "PUT",
+      "params": [
+        {
+          "name": "issueIdOrKey",
+          "type": "string",
+          "description": "The ID or key of the Jira ticket (e.g., 'PROJ-123').",
+          "required": true,
+          "in": "path"
+        },
+        {
+          "name": "fields",
+          "type": "object",
+          "description": "A JSON object containing the fields to update",
+          "required": true,
+          "in": "body",
+          "body_template": {
+            "fields": "{{fields}}"
+          }
+        }
+      ]
+    }
+  ]
+}
