@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  app:
+    # Construye la imagen usando el Dockerfile en el directorio actual.
+    build: .
+    # Carga las variables de entorno desde el archivo .env.
+    # Asegúrate de que tu archivo .env exista y contenga la GEMINI_API_KEY.
+    env_file:
+      - .env
+    ports:
+      # Mapea el puerto de depuración del contenedor al host.
+      # 5678 es el puerto estándar para debugpy (VS Code) y pycharm-debug.py (JetBrains).
+      - "5678:5678"
+    volumes:
+      # Sincroniza el código fuente local con el contenedor para reflejar los cambios al instante.
+      - ./src:/app/src
+      # Sincroniza la carpeta de imágenes generadas para que los archivos se guarden en tu máquina local.
+      - ./generated_images:/app/generated_images
+    # El comando para iniciar la aplicación con el depurador adjunto.
+    # --wait-for-client pausa la ejecución hasta que el depurador del IDE se conecte.
+    # Para VS Code (debugpy):
+    command: python -m debugpy --listen 0.0.0.0:5678 --wait-for-client src/photo_sorter/main.py
+    # Para JetBrains (PyCharm):
+    # Descomenta la siguiente línea y comenta la de arriba si usas JetBrains.
+    # command: python -m pycharm_debug --host 0.0.0.0 --port 5678 --wait-for-client src/photo_sorter/main.py
