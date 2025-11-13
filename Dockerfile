@@ -6,12 +6,12 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Establece variables de entorno para asegurar que la salida de Python se muestre en la terminal.
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Instala las dependencias del depurador para VS Code y JetBrains.
 # Esto permite la depuración remota desde tu IDE.
-RUN pip install --no-cache-dir debugpy==1.8.1 pycharm-debug.py==0.1.1
+RUN pip install --no-cache-dir debugpy==1.8.1 
 
 # Copia el archivo de dependencias y las instala.
 # Se copia por separado para aprovechar el almacenamiento en caché de capas de Docker.
